@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang ="en">
+<head>
+<title>Skybox</title>
+<meta charset="utf-8">
+</head>
+
+
+<script id="shader-vs" type="x-shader/x-vertex"> 
+	attribute vec3 aVertexNormal;
+    attribute vec3 aVertexPosition;
+	uniform mat4 uMVMatrix;
+	uniform mat4 uPMatrix;
+	uniform mat4 uNMatrix;
+    varying vec3 vVertexPosition;
+	varying vec3 vVertexNormal;
+	
+	uniform vec3 uLightPosition;
+	uniform vec3 uAmbientLightColor;
+    uniform vec3 uDiffuseLightColor;
+    uniform vec3 uSpecularLightColor;
+	
+	const float shininess = 16.0;
+	varying vec4 vColor;
+    void main() {
+		/*// Get the vertex position in eye coordinates
+		vec4 vertexPositionEye4 = uMVMatrix * vec4(aVertexPosition, 1.0);
+		vec3 vertexPositionEye3 = vertexPositionEye4.xyz / vertexPositionEye4.w;
+		// Calculate the vector (l) to the light source
+		vec3 vectorToLightSource = normalize(uLightPosition - vertexPositionEye3);
+		
+		// Transform the normal (n) to eye coordinates
+		vec3 normalEye = normalize(uNMatrix * aVertexNormal);
+		
+		// Calculate n dot l for diffuse lighting
+		float diffuseLightWeightning = max(dot(normalEye, 
+										vectorToLightSource), 0.0);
+										   
+		// Calculate the reflection vector (r) that is needed for specular light
+		vec3 reflectionVector = normalize(reflect(-vectorToLightSource, 
+												 normalEye));
+		
+		// The camera in eye coordinates is located in the origin and is pointing
+		// along the negative z-axis. Calculate viewVector (v) 
+		// in eye coordinates as:
+		//// (0.0, 0.0, 0.0) - vertexPositionEye3
+		vec3 viewVectorEye = -normalize(vertexPositionEye3);
+		
+		float rdotv = max(dot(reflectionVector, viewVectorEye), 0.0);
+		
+		float specularLightWeightning = pow(rdotv, shininess);
+		
+		// Sum up all three reflection components and send to the fragment shader 
+		vColor = vec4((uAmbientLightColor
+					+ uDiffuseLightColor * diffuseLightWeightning
+					+ uSpecularLightColor * specularLightWeightning),1.0);
+		*/
+		gl_Position = uPMatrix*uMVMatrix*vec4(aVertexPosition, 1.0);
+		vVertexPosition = aVertexPosition;
+		vVertexNormal = aVertexNormal;
+    }
+</script>
+
+<script id="shader-fs" type="x-shader/x-fragment">
+	precision mediump float;
+	varying vec4 vColor;
+	//  Passed in from the vertex shader.
+    varying vec3 vVertexPosition;
+	varying vec3 vVertexNormal;
+	
+	// The texture.
+    uniform samplerCube uCubeSampler;
+	
+	uniform vec3 diff;
+    void main() {
+		//if(diff[0] == 0.0){
+			gl_FragColor = textureCube(uCubeSampler, vVertexPosition);
+		//}
+		//else{
+		//	gl_FragColor = vColor;
+		//}
+    }
+</script>
+
+
+<script src="gl-matrix-min.js"></script>
+<script src="skybox.js"></script>
+<script src="webgl-utils.js"></script>
+
+<body onload="startup()">
+<canvas id="myGLCanvas" width=800 height=800></canvas>
+
+<br>CONTROLS: a -> rotate teapot clockwise</br>
+<br>		  d -> rotate teapot counterclockwise</br>
+<br>		  q -> rotate around teapot counterclockwise</br>
+<br>		  e -> rotate around teapot clockwise</br>
+</body>
+</html>
+
